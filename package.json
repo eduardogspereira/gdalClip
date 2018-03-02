@@ -1,6 +1,6 @@
 {
-  "name": "gdalClip",
-  "version": "1.0.0",
+  "name": "gdalclip",
+  "version": "1.0.1",
   "description": "Clip geometries between two datasets while maintain the attributes from both",
   "main": "src/index.js",
   "scripts": {
@@ -10,12 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/eduardogspereira/gdalClip.git"
   },
-  "keywords": [
-    "GIS",
-    "GDAL",
-    "geo",
-    "clip"
-  ],
+  "keywords": ["GIS", "GDAL", "geo", "clip"],
   "author": "Eduardo G. S. Pereira",
   "license": "ISC",
   "bugs": {
