@@ -1,0 +1,39 @@
+{
+  "name": "gdalClip",
+  "version": "1.0.0",
+  "description": "Clip geometries between two datasets while maintain the attributes from both",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduardogspereira/gdalClip.git"
+  },
+  "keywords": [
+    "GIS",
+    "GDAL",
+    "geo",
+    "clip"
+  ],
+  "author": "Eduardo G. S. Pereira",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eduardogspereira/gdalClip/issues"
+  },
+  "homepage": "https://github.com/eduardogspereira/gdalClip#readme",
+  "devDependencies": {
+    "eslint": "^4.18.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jest": "^21.12.2",
+    "eslint-plugin-prettier": "^2.6.0",
+    "jest": "^22.4.0",
+    "lint-staged": "^7.0.0",
+    "prettier": "^1.10.2"
+  },
+  "dependencies": {
+    "gdal": "^0.9.6"
+  }
+}
