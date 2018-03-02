@@ -45,15 +45,17 @@ const clipFeatures = (newLayer, layersColumns, datasetCut, datasetBase) => {
     baseFeatures.forEach(baseFeature => {
       const clipFeature = cutFeature.getGeometry().intersection(baseFeature.getGeometry());
 
-      const feature = new gdal.Feature(newLayer);
-      feature.setGeometry(clipFeature);
-      for (const column of layersColumns.datasetCut) {
-        feature.fields.set(column, cutFeature.fields.get(column));
+      if (!clipFeature.isEmpty()) {
+        const feature = new gdal.Feature(newLayer);
+        feature.setGeometry(clipFeature);
+        for (const column of layersColumns.datasetCut) {
+          feature.fields.set(column, cutFeature.fields.get(column));
+        }
+        for (const column of layersColumns.datasetBase) {
+          feature.fields.set(column, baseFeature.fields.get(column));
+        }
+        newLayer.features.add(feature);
       }
-      for (const column of layersColumns.datasetBase) {
-        feature.fields.set(column, baseFeature.fields.get(column));
-      }
-      newLayer.features.add(feature);
     });
   });
   newLayer.flush();
