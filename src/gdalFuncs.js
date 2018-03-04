@@ -55,23 +55,44 @@ const clipFeatures = (newLayer, layersColumns, datasetCut, datasetBase) => {
     const baseFeatures = datasetBase.features;
     baseFeatures.forEach(baseFeature => {
       const clipFeature = cutFeature.getGeometry().intersection(baseFeature.getGeometry());
-
       if (!clipFeature.isEmpty()) {
-        const feature = new gdal.Feature(newLayer);
-        feature.setGeometry(clipFeature);
-        for (const column of layersColumns.datasetCut) {
-          feature.fields.set(column, cutFeature.fields.get(column));
+        if (clipFeature.constructor.name === 'Polygon');
+        {
+          const feature = new gdal.Feature(newLayer);
+          feature.setGeometry(clipFeature);
+          for (const column of layersColumns.datasetCut) {
+            feature.fields.set(column, cutFeature.fields.get(column));
+          }
+          for (const column of layersColumns.datasetBase) {
+            if (!column.includes('|')) {
+              feature.fields.set(column, baseFeature.fields.get(column));
+            } else {
+              const columnName = column.split('|')[1];
+              const columnValue = baseFeature.fields.get(column.split('|')[0]);
+              feature.fields.set(columnName, columnValue);
+            }
+          }
+          newLayer.features.add(feature);
         }
-        for (const column of layersColumns.datasetBase) {
-          if (!column.includes('|')) {
-            feature.fields.set(column, baseFeature.fields.get(column));
-          } else {
-            const columnName = column.split('|')[1];
-            const columnValue = baseFeature.fields.get(column.split('|')[0]);
-            feature.fields.set(columnName, columnValue);
+        if (clipFeature.constructor.name === 'MultiPolygon') {
+          for (const multipart of clipFeature.children.toArray()) {
+            const feature = new gdal.Feature(newLayer);
+            feature.setGeometry(multipart);
+            for (const column of layersColumns.datasetCut) {
+              feature.fields.set(column, cutFeature.fields.get(column));
+            }
+            for (const column of layersColumns.datasetBase) {
+              if (!column.includes('|')) {
+                feature.fields.set(column, baseFeature.fields.get(column));
+              } else {
+                const columnName = column.split('|')[1];
+                const columnValue = baseFeature.fields.get(column.split('|')[0]);
+                feature.fields.set(columnName, columnValue);
+              }
+            }
+            newLayer.features.add(feature);
           }
         }
-        newLayer.features.add(feature);
       }
     });
   });
