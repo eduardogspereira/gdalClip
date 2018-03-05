@@ -1,23 +1,61 @@
 const gdalFuncs = require('./gdalFuncs');
+const gdalMultiToSingle = require('gdalmultitosingle');
 const uuid = require('uuid');
 
 const processData = (
-  datasetCut,
+  datasetClip,
   datasetBase,
-  outputName = `tmp/output_${uuid().replace(/-/g, '')}.shp`,
+  outputName = `output_${uuid().replace(/-/g, '')}.shp`,
   outputFormat = 'ESRI Shapefile',
 ) => {
   try {
-    if (datasetCut.constructor.name !== 'Layer' || datasetBase.constructor.name !== 'Layer') {
-      throw new Error('The input must be an Layer object from GDAL');
+    gdalFuncs.validateEPSG(datasetClip, datasetBase);
+    const datasetClipSingle = gdalFuncs.getLayer(
+      gdalMultiToSingle.processData(datasetClip, '/vsimem/datasetCut.shp', 'ESRI Shapefile'),
+    );
+    const datasetBaseSingle = gdalFuncs.getLayer(
+      gdalMultiToSingle.processData(datasetBase, '/vsimem/datasetClip.shp', 'ESRI Shapefile'),
+    );
+
+    const geomType = datasetBaseSingle.features.first().getGeometry().name;
+    let typeCode;
+    let typeName;
+    switch (geomType.toLowerCase()) {
+      case 'multipolygon':
+      case 'polygon': {
+        typeCode = 3;
+        typeName = 'polygon';
+        break;
+      }
+      case 'point':
+      case 'multipoint':
+        typeCode = 1;
+        typeName = 'point';
+        break;
+      case 'linestring':
+      case 'multilinestring':
+        typeCode = 2;
+        typeName = 'linestring';
+        break;
+      default:
+        throw new Error('Invalid geometry type.');
     }
 
-    gdalFuncs.validateEPSG(datasetCut, datasetBase);
-    const { newLayer, layersColumns } = gdalFuncs.createLayer(datasetCut, datasetBase);
-    const clippedData = gdalFuncs.clipFeatures(newLayer, layersColumns, datasetCut, datasetBase);
-    const exportData = gdalFuncs.exportLayer(clippedData, outputName, outputFormat);
+    const { newLayer, layersColumns } = gdalFuncs.createLayer(
+      datasetClipSingle,
+      datasetBaseSingle,
+      typeCode,
+    );
 
-    return exportData;
+    const clippedData = gdalFuncs.clipFeatures(
+      newLayer,
+      layersColumns,
+      datasetClipSingle,
+      datasetBaseSingle,
+      typeName,
+    );
+
+    return gdalFuncs.exportLayer(clippedData, outputName, outputFormat, typeCode);
   } catch (error) {
     throw Error(error);
   }
